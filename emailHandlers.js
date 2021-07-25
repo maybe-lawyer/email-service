@@ -138,4 +138,6 @@ module.exports = {
   snailgunHandler,
   emailServiceHandler,
   emailStatusHandler: snailgunStatusHandler,
+  validateBody,
+  createPayload,
 }
