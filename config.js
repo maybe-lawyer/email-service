@@ -1,0 +1,7 @@
+const { EMAIL_API_PORT, SNAILGUN_API_KEY, SPENDGRID_API_KEY } = process.env;
+
+module.exports = {
+  API_PORT: EMAIL_API_PORT || '8080',
+  SNAILGUN_API_KEY,
+  SPENDGRID_API_KEY,
+};
