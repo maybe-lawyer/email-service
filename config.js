@@ -5,6 +5,7 @@ const {
   EMAIL_SERVICE_NAME,
   FROM_NAME,
   FROM_EMAIL,
+  SNAILGUN_TIMEOUT,
 } = process.env;
 
 const SPENDGRID_ENDPOINT = 'https://bw-interviews.herokuapp.com/spendgrid/send_email';
@@ -18,5 +19,6 @@ module.exports = {
   SNAILGUN_API_KEY,
   SNAILGUN_ENDPOINT,
   SPENDGRID_API_KEY,
-  SPENDGRID_ENDPOINT
+  SPENDGRID_ENDPOINT,
+  SNAILGUN_TIMEOUT: SNAILGUN_TIMEOUT || 5000,
 };
