@@ -8,7 +8,6 @@ const {
   SNAILGUN_ENDPOINT,
   SPENDGRID_API_KEY,
   SPENDGRID_ENDPOINT,
-  SNAILGUN_TIMEOUT
 } = require('./config');
 
 const parseFieldsForSpendgrid = ({ to, to_name, from, from_name }) => ({
