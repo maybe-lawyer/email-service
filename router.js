@@ -1,9 +1,8 @@
 const router = require('express').Router();
 
-router.post('/email', (req, res) => {
-  res.status(200);
-  res.send({ message: 'POST request received' });
-});
+const { emailServiceHandler } = require('./emailHandlers');
+
+router.post('/email', emailServiceHandler);
 
 router.use((_req, res) => {
   res.status(404);
