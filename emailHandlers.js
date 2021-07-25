@@ -1,5 +1,6 @@
 const got = require('got');
 const { convert } = require('html-to-text');
+const validator = require("email-validator");
 
 const {
   EMAIL_SERVICE,
@@ -26,11 +27,30 @@ const FIELD_PARSER_MAP = {
   snailgun: parseFieldsForSnailgun,
   spendgrid: parseFieldsForSpendgrid,
 };
+const REQUIRED_FIELDS = [
+  'to',
+  'to_name',
+  'from',
+  'from_name',
+  'subject',
+  'body'
+];
 
 const parseFields = FIELD_PARSER_MAP[EMAIL_SERVICE];
 
-const validateBody = (fields) => {
-  // not implemented, throw error if validation fails
+const validateBody = (body) => {
+  REQUIRED_FIELDS.forEach((field) => {
+    if (!body[field]) {
+      throw new Error(`Request missing required field ${field}`);
+    }
+  });
+
+  ['to', 'from'].forEach(field => {
+    if (!validator.validate(body[field])) {
+      throw new Error(`Invalid email ${body[field]}`);
+    }
+  })
+
   return true;
 };
 
@@ -69,7 +89,7 @@ const spendgridHandler = async (req, res) => {
   } catch (e) {
     console.log('Spendgrid Failure', e);
     res.status(500);
-    res.send(e);
+    res.send({ error: e, message: e.message });
   }
 };
 
@@ -89,7 +109,7 @@ const snailgunHandler = async (req, res) => {
   } catch (e) {
     console.log('Snailgun Failure', e);
     res.status(500);
-    res.send(e);
+    res.send({ error: e, message: e.message });
   }
 };
 
