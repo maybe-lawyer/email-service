@@ -10,6 +10,8 @@ const {
   SPENDGRID_ENDPOINT,
 } = require('./config');
 
+const { addEmail, retrieveEmail, updateStatus } = require('./emailStore');
+
 const parseFieldsForSpendgrid = ({ to, to_name, from, from_name }) => ({
   sender: `${from_name} <${from}>`,
   recipient: `${to_name} <${to}>`
@@ -54,7 +56,6 @@ const validateBody = (body) => {
 };
 
 const createPayload = (requestBody) => {
-  validateBody(requestBody);
   const {
     to,
     to_name,
@@ -73,7 +74,10 @@ const createPayload = (requestBody) => {
 };
 
 const spendgridHandler = async (req, res) => {
+  let emailId;
   try {
+    validateBody(req.body);
+    emailId = addEmail(req.body);
     const payload = createPayload(req.body);
     const spendgridResponse = await got(SPENDGRID_ENDPOINT, {
       method: 'POST',
@@ -83,10 +87,12 @@ const spendgridHandler = async (req, res) => {
         'X-Api-Key': SPENDGRID_API_KEY,
       }
     });
+    updateStatus(emailId, 'sent');
     res.status(spendgridResponse.statusCode);
-    res.send({ message: spendgridResponse.body });
+    res.send({ message: spendgridResponse.body, id: emailId });
   } catch (e) {
     console.log('Spendgrid Failure', e);
+    updateStatus(emailId, 'error');
     res.status(500);
     res.send({ error: e, message: e.message });
   }
@@ -112,6 +118,18 @@ const snailgunHandler = async (req, res) => {
   }
 };
 
+const getEmail = (req, res) => {
+  const { params: { id } } = req;
+  const email = retrieveEmail(id);
+  if (!email) {
+    res.status(404);
+    res.send({});
+    return;
+  }
+  res.status(200);
+  res.send(email);
+};
+
 const snailgunStatusHandler = async (req, res) => {
   const emailId = req.params.id;
   const statusResponse = await got(`${SNAILGUN_ENDPOINT}/${emailId}`, {
@@ -122,7 +140,7 @@ const snailgunStatusHandler = async (req, res) => {
   });
   res.status(statusResponse.statusCode);
   res.send(statusResponse.body);
-}
+};
 
 
 const EMAIL_SERVICE_MAP = {
@@ -139,4 +157,5 @@ module.exports = {
   emailStatusHandler: snailgunStatusHandler,
   validateBody,
   createPayload,
+  getEmail,
 }
