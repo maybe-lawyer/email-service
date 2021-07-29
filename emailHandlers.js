@@ -99,7 +99,10 @@ const spendgridHandler = async (req, res) => {
 };
 
 const snailgunHandler = async (req, res) => {
+  let emailId;
   try {
+    validateBody(req.body);
+    emailId = addEmail(req.body);
     const payload = createPayload(req.body);
     const snailgunPostResponse = await got(SNAILGUN_ENDPOINT, {
       method: 'POST',
@@ -109,10 +112,12 @@ const snailgunHandler = async (req, res) => {
         'X-Api-Key': SNAILGUN_API_KEY,
       }
     });
+    updateStatus(emailId, 'queued');
     res.status(snailgunPostResponse.statusCode);
     res.send(snailgunPostResponse.body);
   } catch (e) {
     console.log('Snailgun Failure', e);
+    updateStatus(emailId, 'error');
     res.status(500);
     res.send({ error: e, message: e.message });
   }
@@ -121,6 +126,7 @@ const snailgunHandler = async (req, res) => {
 const getEmail = (req, res) => {
   const { params: { id } } = req;
   const email = retrieveEmail(id);
+  // do all the snailgun stuff
   if (!email) {
     res.status(404);
     res.send({});
@@ -141,7 +147,6 @@ const snailgunStatusHandler = async (req, res) => {
   res.status(statusResponse.statusCode);
   res.send(statusResponse.body);
 };
-
 
 const EMAIL_SERVICE_MAP = {
   spendgrid: spendgridHandler,

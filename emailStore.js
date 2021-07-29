@@ -1,9 +1,11 @@
+const { EMAIL_SERVICE } = require('./config');
+
 // keyed on email id
 const db = {};
 
 const addEmail = (data) => {
   const id = (Math.floor(Math.random() * 10000000)).toString();
-  db[id] = data;
+  db[id] = { ...data, status: 'pending', service: EMAIL_SERVICE };
   return id;
 };
 
